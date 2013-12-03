@@ -6,7 +6,7 @@ module Bootstrap
 
       source_root File.expand_path("../templates", __FILE__)
       desc "This generator installs Bootstrap to Asset Pipeline"
-      argument :stylesheets_type, :type => :string, :default => 'less', :banner => '*less or static'
+      argument :stylesheets_type, :type => :string, :default => 'static', :banner => '*less or static'
 
       def add_assets
 
@@ -41,11 +41,7 @@ module Bootstrap
         else
           copy_file "bootstrap.js", "app/assets/javascripts/bootstrap.js"
         end
-        if use_less?
-          copy_file "bootstrap_and_overrides.less", "app/assets/stylesheets/bootstrap_and_overrides.css.less"
-        else
-          copy_file "bootstrap_and_overrides.css", "app/assets/stylesheets/bootstrap_and_overrides.css"
-        end
+        copy_file "bootstrap_and_overrides.css", "app/assets/stylesheets/bootstrap_and_overrides.css"
       end
 
       def add_locale
@@ -57,24 +53,7 @@ module Bootstrap
         end
       end
 
-      def cleanup_legacy
-        # Remove old requires (if any) that included twitter/bootstrap directly:
-        gsub_file("app/assets/stylesheets/application.css", %r|\s*\*=\s*twitter/bootstrap\s*\n|, "")
-        gsub_file("app/assets/stylesheets/application.css", %r|\s*\*=\s*twitter/bootstrap_responsive\s*\n|, "")
-        if File.exist?('app/assets/stylesheets/bootstrap_override.css.less')
-          puts <<-EOM
-          Warning:
-            app/assets/stylesheets/bootstrap_override.css.less exists
-            It should be removed, as it has been superceded by app/assets/stylesheets/bootstrap_and_overrides.css.less
-          EOM
-        end
-      end
-
     private
-      def use_less?
-        (defined?(Less) && (stylesheets_type!='static') ) || (stylesheets_type=='less')
-      end
-
       def use_coffeescript?
         ::Rails.configuration.app_generators.rails[:javascript_engine] == :coffee
       end
